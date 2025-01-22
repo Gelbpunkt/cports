@@ -1,6 +1,6 @@
 pkgname = "base-cross"
 pkgver = "0.1"
-pkgrel = 4
+pkgrel = 5
 build_style = "meta"
 depends = [
     "clang-rt-cross",
@@ -19,6 +19,7 @@ _targetlist = [
     "aarch64",
     "armhf",
     "armv7",
+    "mipsel",
     "ppc64le",
     "ppc64",
     "ppc",

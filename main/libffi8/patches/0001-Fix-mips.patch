@@ -1,0 +1,34 @@
+From a7eadee8f8bca1f131250c95f880748b54761c1e Mon Sep 17 00:00:00 2001
+From: Jens Reidel <adrian@travitia.xyz>
+Date: Wed, 22 Jan 2025 23:26:11 +0100
+Subject: [PATCH] Fix mips
+
+Signed-off-by: Jens Reidel <adrian@travitia.xyz>
+---
+ src/mips/o32.S | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/mips/o32.S b/src/mips/o32.S
+index 78517be..bfcf752 100644
+--- a/src/mips/o32.S
++++ b/src/mips/o32.S
+@@ -453,7 +453,8 @@ $LFE2:
+ 
+ /* DWARF-2 unwind info. */
+ 
+-	.section	.eh_frame,"a",@progbits
++#if defined(__GNUC__) && !defined(__llvm__)
++	.section	.eh_frame,EH_FRAME_FLAGS,@progbits
+ $Lframe0:
+ 	.4byte	$LECIE0-$LSCIE0	 # Length of Common Information Entry
+ $LSCIE0:
+@@ -557,5 +558,6 @@ $LASFDE2:
+ 	.uleb128 SIZEOF_FRAME2
+ 	.align	2
+ $LEFDE2:
++#endif
+ 
+ #endif
+-- 
+2.48.1
+

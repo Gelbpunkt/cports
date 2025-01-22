@@ -1,0 +1,26 @@
+From ea56787ce2fd01b8ccbaa2df1ea732852999866f Mon Sep 17 00:00:00 2001
+From: Jens Reidel <adrian@travitia.xyz>
+Date: Wed, 22 Jan 2025 22:22:53 +0100
+Subject: [PATCH] Fix mipsel
+
+Signed-off-by: Jens Reidel <adrian@travitia.xyz>
+---
+ configure | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/configure b/configure
+index 5cd8163a..e9b492db 100755
+--- a/configure
++++ b/configure
+@@ -339,6 +339,8 @@ if test "$gcc" -eq 1 && ($cc $CFLAGS -c $test.c) >> configure.log 2>&1; then
+       ARCH=powerpc64 ;;
+     powerpc64le | ppc64le)
+       ARCH=powerpc64le ;;
++    mipsel):
++      ARCH=mipsel ;;
+   esac
+   CFLAGS="-O2 ${CFLAGS}"
+   if test -n "${ARCHS}"; then
+-- 
+2.48.1
+

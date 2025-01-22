@@ -1,6 +1,6 @@
 pkgname = "llvm"
 pkgver = "19.1.7"
-pkgrel = 1
+pkgrel = 2
 build_style = "cmake"
 configure_args = [
     "-DCMAKE_BUILD_TYPE=Release",
@@ -133,7 +133,7 @@ match self.profile().arch:
     case "ppc64" | "riscv64" | "loongarch64":
         pass
     # unsupported on 32 bit cpus
-    case "ppc" | "armhf" | "armv7":
+    case "ppc" | "armhf" | "armv7" | "mipsel":
         pass
     # elsewhere is okay
     case _:
@@ -158,6 +158,8 @@ match self.profile().arch:
         _arch = "ARM"
     case "loongarch64" | "loongarch32":
         _arch = "LoongArch"
+    case "mipsel":
+        _arch = "Mips"
     case _:
         broken = f"Unknown CPU architecture: {self.profile().arch}"
 

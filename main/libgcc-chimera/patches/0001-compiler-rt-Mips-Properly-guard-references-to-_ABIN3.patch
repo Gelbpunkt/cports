@@ -1,0 +1,97 @@
+From 39fcf03c7b355310d6c1b1d0a050bfa3aa8303b2 Mon Sep 17 00:00:00 2001
+From: Jens Reidel <adrian@travitia.xyz>
+Date: Sun, 26 Jan 2025 22:16:52 +0100
+Subject: [PATCH 1/5] [compiler-rt][Mips] Properly guard references to _ABIN32
+
+When targeting ABIO32 (mips32), _ABIN32 is undefined and the
+preprocessor directives cause compile errors. Guard references to
+_ABIN32 with defined(_ABIN32), just like the references to _ABIO32.
+
+Signed-off-by: Jens Reidel <adrian@travitia.xyz>
+---
+ compiler-rt/lib/safestack/safestack_platform.h  |  3 ++-
+ .../lib/sanitizer_common/sanitizer_linux.cpp    | 17 ++++++++++-------
+ .../sanitizer_platform_limits_posix.h           | 11 +++++++----
+ 3 files changed, 19 insertions(+), 12 deletions(-)
+
+diff --git a/compiler-rt/lib/safestack/safestack_platform.h b/compiler-rt/lib/safestack/safestack_platform.h
+index 41c7c25fdaf4..3f6a69026548 100644
+--- a/compiler-rt/lib/safestack/safestack_platform.h
++++ b/compiler-rt/lib/safestack/safestack_platform.h
+@@ -54,7 +54,8 @@ extern "C" void *__mmap(void *, size_t, int, int, int, int, off_t);
+ // but it still needs to use 64-bit syscalls.
+ #if SANITIZER_LINUX &&                                \
+     (defined(__x86_64__) || defined(__powerpc64__) || \
+-     SANITIZER_WORDSIZE == 64 || (defined(__mips__) && _MIPS_SIM == _ABIN32))
++     SANITIZER_WORDSIZE == 64 ||                      \
++     (defined(__mips__) && defined(_ABIN32) && _MIPS_SIM == _ABIN32))
+ #  define SANITIZER_LINUX_USES_64BIT_SYSCALLS 1
+ #else
+ #  define SANITIZER_LINUX_USES_64BIT_SYSCALLS 0
+diff --git a/compiler-rt/lib/sanitizer_common/sanitizer_linux.cpp b/compiler-rt/lib/sanitizer_common/sanitizer_linux.cpp
+index 997b95f343d4..7aa48d29d2d5 100644
+--- a/compiler-rt/lib/sanitizer_common/sanitizer_linux.cpp
++++ b/compiler-rt/lib/sanitizer_common/sanitizer_linux.cpp
+@@ -134,9 +134,10 @@ const int FUTEX_WAKE_PRIVATE = FUTEX_WAKE | FUTEX_PRIVATE_FLAG;
+ // Are we using 32-bit or 64-bit Linux syscalls?
+ // x32 (which defines __x86_64__) has SANITIZER_WORDSIZE == 32
+ // but it still needs to use 64-bit syscalls.
+-#  if SANITIZER_LINUX && (defined(__x86_64__) || defined(__powerpc64__) || \
+-                          SANITIZER_WORDSIZE == 64 ||                      \
+-                          (defined(__mips__) && _MIPS_SIM == _ABIN32))
++#  if SANITIZER_LINUX &&                                \
++      (defined(__x86_64__) || defined(__powerpc64__) || \
++       SANITIZER_WORDSIZE == 64 ||                      \
++       (defined(__mips__) && defined(_ABIN32) && _MIPS_SIM == _ABIN32))
+ #    define SANITIZER_LINUX_USES_64BIT_SYSCALLS 1
+ #  else
+ #    define SANITIZER_LINUX_USES_64BIT_SYSCALLS 0
+@@ -429,8 +430,9 @@ uptr internal_stat(const char *path, void *buf) {
+                              AT_NO_AUTOMOUNT, STATX_BASIC_STATS, (uptr)&bufx);
+   statx_to_stat(&bufx, (struct stat *)buf);
+   return res;
+-#      elif (SANITIZER_WORDSIZE == 64 || SANITIZER_X32 ||    \
+-             (defined(__mips__) && _MIPS_SIM == _ABIN32)) && \
++#      elif (                                                                 \
++          SANITIZER_WORDSIZE == 64 || SANITIZER_X32 ||                        \
++          (defined(__mips__) && defined(_ABIN32) && _MIPS_SIM == _ABIN32)) && \
+           !SANITIZER_SPARC
+   return internal_syscall(SYSCALL(newfstatat), AT_FDCWD, (uptr)path, (uptr)buf,
+                           0);
+@@ -467,8 +469,9 @@ uptr internal_lstat(const char *path, void *buf) {
+                              STATX_BASIC_STATS, (uptr)&bufx);
+   statx_to_stat(&bufx, (struct stat *)buf);
+   return res;
+-#      elif (defined(_LP64) || SANITIZER_X32 ||              \
+-             (defined(__mips__) && _MIPS_SIM == _ABIN32)) && \
++#      elif (                                                                 \
++          defined(_LP64) || SANITIZER_X32 ||                                  \
++          (defined(__mips__) && defined(_ABIN32) && _MIPS_SIM == _ABIN32)) && \
+           !SANITIZER_SPARC
+   return internal_syscall(SYSCALL(newfstatat), AT_FDCWD, (uptr)path, (uptr)buf,
+                           AT_SYMLINK_NOFOLLOW);
+diff --git a/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.h b/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.h
+index 7e62dc0e0523..1a7d9e64048e 100644
+--- a/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.h
++++ b/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.h
+@@ -98,10 +98,13 @@ const unsigned struct_kernel_stat64_sz = 104;
+ const unsigned struct_kernel_stat_sz = 144;
+ const unsigned struct_kernel_stat64_sz = 104;
+ #elif defined(__mips__)
+-const unsigned struct_kernel_stat_sz =
+-    SANITIZER_ANDROID
+-        ? FIRST_32_SECOND_64(104, 128)
+-        : FIRST_32_SECOND_64((_MIPS_SIM == _ABIN32) ? 176 : 160, 216);
++const unsigned struct_kernel_stat_sz = SANITIZER_ANDROID
++                                           ? FIRST_32_SECOND_64(104, 128)
++#      if defined(_ABIN32) && _MIPS_SIM == _ABIN32
++                                           : FIRST_32_SECOND_64(176, 216);
++#      else
++                                           : FIRST_32_SECOND_64(160, 216);
++#      endif
+ const unsigned struct_kernel_stat64_sz = 104;
+ #elif defined(__s390__) && !defined(__s390x__)
+ const unsigned struct_kernel_stat_sz = 64;
+-- 
+2.48.1
+

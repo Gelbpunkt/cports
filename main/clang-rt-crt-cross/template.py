@@ -1,7 +1,7 @@
 pkgname = "clang-rt-crt-cross"
 _musl_ver = "1.2.5"
 pkgver = "19.1.7"
-pkgrel = 1
+pkgrel = 2
 build_style = "cmake"
 configure_args = [
     "-DCMAKE_BUILD_TYPE=Release",
@@ -66,6 +66,7 @@ _targetlist = [
     "aarch64",
     "armhf",
     "armv7",
+    "mipsel",
     "ppc64le",
     "ppc64",
     "ppc",

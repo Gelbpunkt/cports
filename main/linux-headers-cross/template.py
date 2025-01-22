@@ -1,6 +1,6 @@
 pkgname = "linux-headers-cross"
 pkgver = "6.13.1"
-pkgrel = 0
+pkgrel = 1
 hostmakedepends = ["perl"]
 depends = []
 pkgdesc = "Linux API headers for cross-compiling"
@@ -16,6 +16,7 @@ _targetlist = [
     ("aarch64", "arm64"),
     ("armhf", "arm"),
     ("armv7", "arm"),
+    ("mipsel", "mips"),
     ("ppc64le", "powerpc"),
     ("ppc64", "powerpc"),
     ("ppc", "powerpc"),
