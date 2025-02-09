@@ -1,6 +1,6 @@
 pkgname = "linux-headers"
 pkgver = "6.13.1"
-pkgrel = 0
+pkgrel = 1
 hostmakedepends = ["perl"]
 pkgdesc = "Linux API headers for userland development"
 license = "GPL-2.0-only"
@@ -23,6 +23,8 @@ match self.profile().arch:
         _arch = "arm"
     case "loongarch64" | "loongarch64":
         _arch = "loongarch"
+    case "s390x":
+        _arch = "s390"
     case _:
         broken = f"Unknown CPU architecture: {self.profile().arch}"
 

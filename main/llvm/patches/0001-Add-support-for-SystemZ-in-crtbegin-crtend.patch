@@ -1,0 +1,92 @@
+From a001a97c6b8ae9ec15d14f0f771ddcf1139888bd Mon Sep 17 00:00:00 2001
+From: Jens Reidel <adrian@travitia.xyz>
+Date: Wed, 2 Jul 2025 04:58:21 +0200
+Subject: [PATCH] Add support for SystemZ in crtbegin/crtend
+
+Signed-off-by: Jens Reidel <adrian@travitia.xyz>
+---
+ compiler-rt/cmake/builtin-config-ix.cmake | 3 ++-
+ compiler-rt/lib/builtins/CMakeLists.txt   | 5 +++++
+ compiler-rt/lib/builtins/clear_cache.c    | 2 ++
+ compiler-rt/lib/builtins/crtbegin.c       | 8 ++++++++
+ 4 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/compiler-rt/cmake/builtin-config-ix.cmake b/compiler-rt/cmake/builtin-config-ix.cmake
+index b1bde47ec855..0ff381fe8e93 100644
+--- a/compiler-rt/cmake/builtin-config-ix.cmake
++++ b/compiler-rt/cmake/builtin-config-ix.cmake
+@@ -72,6 +72,7 @@ set(PPC32 powerpc powerpcspe)
+ set(PPC64 powerpc64 powerpc64le)
+ set(RISCV32 riscv32)
+ set(RISCV64 riscv64)
++set(S390X s390x)
+ set(SPARC sparc)
+ set(SPARCV9 sparcv9)
+ set(WASM32 wasm32)
+@@ -87,7 +88,7 @@ endif()
+ set(ALL_BUILTIN_SUPPORTED_ARCH
+   ${X86} ${X86_64} ${AMDGPU} ${ARM32} ${ARM64} ${AVR}
+   ${HEXAGON} ${MIPS32} ${MIPS64} ${NVPTX} ${PPC32} ${PPC64}
+-  ${RISCV32} ${RISCV64} ${SPARC} ${SPARCV9}
++  ${RISCV32} ${RISCV64} ${S390X} ${SPARC} ${SPARCV9}
+   ${WASM32} ${WASM64} ${VE} ${LOONGARCH64})
+ 
+ include(CompilerRTUtils)
+diff --git a/compiler-rt/lib/builtins/CMakeLists.txt b/compiler-rt/lib/builtins/CMakeLists.txt
+index 19316c52d12c..d49337d33e8a 100644
+--- a/compiler-rt/lib/builtins/CMakeLists.txt
++++ b/compiler-rt/lib/builtins/CMakeLists.txt
+@@ -768,6 +768,11 @@ set(riscv64_SOURCES
+ set(sparc_SOURCES ${GENERIC_SOURCES} ${GENERIC_TF_SOURCES})
+ set(sparcv9_SOURCES ${GENERIC_SOURCES} ${GENERIC_TF_SOURCES})
+ 
++set(s390x_SOURCES
++  ${GENERIC_SOURCES}
++  ${GENERIC_TF_SOURCES}
++)
++
+ set(wasm32_SOURCES
+   ${GENERIC_TF_SOURCES}
+   ${GENERIC_SOURCES}
+diff --git a/compiler-rt/lib/builtins/clear_cache.c b/compiler-rt/lib/builtins/clear_cache.c
+index 2ac99b25c243..441eabd1fe92 100644
+--- a/compiler-rt/lib/builtins/clear_cache.c
++++ b/compiler-rt/lib/builtins/clear_cache.c
+@@ -62,6 +62,8 @@ void __clear_cache(void *start, void *end) {
+ #if __i386__ || __x86_64__ || defined(_M_IX86) || defined(_M_X64)
+ // Intel processors have a unified instruction and data cache
+ // so there is nothing to do
++#elif defined(__s390__)
++// no-op
+ #elif defined(_WIN32) && (defined(__arm__) || defined(__aarch64__))
+   FlushInstructionCache(GetCurrentProcess(), start, end - start);
+ #elif defined(__arm__) && !defined(__APPLE__)
+diff --git a/compiler-rt/lib/builtins/crtbegin.c b/compiler-rt/lib/builtins/crtbegin.c
+index d5f7756308b0..8035bc9f3b70 100644
+--- a/compiler-rt/lib/builtins/crtbegin.c
++++ b/compiler-rt/lib/builtins/crtbegin.c
+@@ -95,6 +95,10 @@ __asm__(".pushsection .init,\"ax\",@progbits\n\t"
+ __asm__(".pushsection .init,\"ax\",@progbits\n\t"
+         "call __do_init\n\t"
+         ".popsection");
++#elif defined(__s390x__)
++__asm__(".pushection .init,\"ax\",@progbits\n\t"
++        "brasl %r14,__do_init\n\t"
++        ".popsection");
+ #else
+ #error "crtbegin without .init_fini array unimplemented for this architecture"
+ #endif // CRT_HAS_INITFINI_ARRAY
+@@ -166,6 +170,10 @@ __asm__(".pushsection .fini,\"ax\",@progbits\n\t"
+ __asm__(".pushsection .fini,\"ax\",@progbits\n\t"
+         "call __do_fini\n\t"
+         ".popsection");
++#elif defined(__s390x__)
++__asm__(".pushsection .fini,\"ax\",@progbits\n\t"
++        "brasl %r14,__do_fini\n\t"
++        ".popsection");
+ #else
+ #error "crtbegin without .init_fini array unimplemented for this architecture"
+ #endif  // CRT_HAS_INIT_FINI_ARRAY
+-- 
+2.50.0
+

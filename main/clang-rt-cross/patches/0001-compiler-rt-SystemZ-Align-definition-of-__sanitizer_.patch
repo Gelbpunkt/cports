@@ -1,0 +1,36 @@
+From 186eb47b03f03f213baa50534ad48269d19b98fa Mon Sep 17 00:00:00 2001
+From: Jens Reidel <adrian@travitia.xyz>
+Date: Thu, 3 Jul 2025 03:01:38 +0200
+Subject: [PATCH] [compiler-rt][SystemZ]: Align definition of
+ __sanitizer_sigaction with musl
+
+Signed-off-by: Jens Reidel <adrian@travitia.xyz>
+---
+ .../lib/sanitizer_common/sanitizer_platform_limits_posix.h    | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.h b/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.h
+index 005ff2762462..ae40b8e0c9ab 100644
+--- a/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.h
++++ b/compiler-rt/lib/sanitizer_common/sanitizer_platform_limits_posix.h
+@@ -669,7 +669,7 @@ struct __sanitizer_sigaction {
+   int sa_flags;
+   __sanitizer_sigset_t sa_mask;
+ #else
+-#if defined(__s390x__)
++#if defined(__s390x__) && !SANITIZER_MUSL
+   int sa_resv;
+ #else
+   __sanitizer_sigset_t sa_mask;
+@@ -698,7 +698,7 @@ struct __sanitizer_sigaction {
+ #if defined(__mips__) && (SANITIZER_WORDSIZE == 32)
+   int sa_resv[1];
+ #endif
+-#if defined(__s390x__)
++#if defined(__s390x__) && !SANITIZER_MUSL
+   __sanitizer_sigset_t sa_mask;
+ #endif
+ };
+-- 
+2.50.0
+

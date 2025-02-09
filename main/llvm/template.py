@@ -1,6 +1,6 @@
 pkgname = "llvm"
 pkgver = "20.1.8"
-pkgrel = 0
+pkgrel = 1
 build_style = "cmake"
 configure_args = [
     "-DCMAKE_BUILD_TYPE=Release",
@@ -146,6 +146,8 @@ match self.profile().arch:
         _arch = "ARM"
     case "loongarch64" | "loongarch32":
         _arch = "LoongArch"
+    case "s390x":
+        _arch = "SystemZ"
     case _:
         broken = f"Unknown CPU architecture: {self.profile().arch}"
 

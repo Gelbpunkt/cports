@@ -26,7 +26,7 @@ options = ["!parallel", "!check"]
 if self.profile().cross:
     configure_args += [
         f"--host={self.profile().triplet}",
-        f"--sysroot={self.profile().sysroot}",
+        #f"--sysroot={self.profile().sysroot}",
         f"--with-readline-cflags=-I{self.profile().sysroot}",
     ]
 

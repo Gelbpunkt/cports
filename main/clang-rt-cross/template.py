@@ -1,6 +1,6 @@
 pkgname = "clang-rt-cross"
 pkgver = "20.1.8"
-pkgrel = 0
+pkgrel = 1
 build_style = "cmake"
 configure_args = [
     "-DCMAKE_BUILD_TYPE=Release",
@@ -70,6 +70,7 @@ _targetlist = [
     "ppc",
     "x86_64",
     "riscv64",
+    "s390x",
     "loongarch64",
 ]
 _targets = sorted(filter(lambda p: p != self.profile().arch, _targetlist))
