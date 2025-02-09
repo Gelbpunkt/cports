@@ -1,6 +1,6 @@
 pkgname = "llvm"
 pkgver = "19.1.7"
-pkgrel = 2
+pkgrel = 3
 build_style = "cmake"
 configure_args = [
     "-DCMAKE_BUILD_TYPE=Release",
@@ -160,6 +160,8 @@ match self.profile().arch:
         _arch = "LoongArch"
     case "mipsel":
         _arch = "Mips"
+    case "s390x":
+        _arch = "SystemZ"
     case _:
         broken = f"Unknown CPU architecture: {self.profile().arch}"
 

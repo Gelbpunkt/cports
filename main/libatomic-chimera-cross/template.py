@@ -1,6 +1,6 @@
 pkgname = "libatomic-chimera-cross"
 pkgver = "0.90.0"
-pkgrel = 4
+pkgrel = 5
 build_style = "makefile"
 makedepends = ["musl-cross"]
 depends = ["musl-cross"]
@@ -23,6 +23,7 @@ _targetlist = [
     "ppc",
     "x86_64",
     "riscv64",
+    "s390x",
     "loongarch64",
 ]
 _targets = list(filter(lambda p: p != self.profile().arch, _targetlist))

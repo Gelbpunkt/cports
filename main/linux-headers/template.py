@@ -1,6 +1,6 @@
 pkgname = "linux-headers"
 pkgver = "6.13.1"
-pkgrel = 1
+pkgrel = 2
 hostmakedepends = ["perl"]
 pkgdesc = "Linux API headers for userland development"
 maintainer = "q66 <q66@chimera-linux.org>"
@@ -26,6 +26,8 @@ match self.profile().arch:
         _arch = "loongarch"
     case "mipsel":
         _arch = "mips"
+    case "s390x":
+        _arch = "s390"
     case _:
         broken = f"Unknown CPU architecture: {self.profile().arch}"
 

@@ -1,6 +1,6 @@
 pkgname = "base-cross"
 pkgver = "0.1"
-pkgrel = 5
+pkgrel = 6
 build_style = "meta"
 depends = [
     "clang-rt-cross",
@@ -25,6 +25,7 @@ _targetlist = [
     "ppc",
     "x86_64",
     "riscv64",
+    "s390x",
     "loongarch64",
 ]
 _targets = list(filter(lambda p: p != self.profile().arch, _targetlist))

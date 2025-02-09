@@ -50,6 +50,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
                 | "armv7"
                 | "loongarch64"
                 | "mipsel"
+                | "s390x"
             ):
                 cmake_cpu = pkg.profile().arch
             case _:
