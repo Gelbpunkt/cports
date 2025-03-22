@@ -1,0 +1,51 @@
+From d6793c408f1da178c293d174bc0de1ed0a6c5a91 Mon Sep 17 00:00:00 2001
+From: Jens Reidel <adrian@travitia.xyz>
+Date: Sun, 23 Mar 2025 15:08:17 +0100
+Subject: [PATCH] Do not fail on qbootctl -m if device is not A/B
+
+Signed-off-by: Jens Reidel <adrian@travitia.xyz>
+---
+ bootctrl_impl.c | 6 ++++--
+ qbootctl.c      | 8 +++++---
+ 2 files changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/bootctrl_impl.c b/bootctrl_impl.c
+index 516547f..97d9034 100644
+--- a/bootctrl_impl.c
++++ b/bootctrl_impl.c
+@@ -410,8 +410,10 @@ int mark_boot_successful(unsigned slot)
+ 	int ret = 0;
+ 
+ 	if (successful < 0 || unbootable < 0) {
+-		fprintf(stderr, "SLOT %s: Failed to read attributes\n", slot_suffix_arr[slot]);
+-		ret = -1;
++		fprintf(stderr,
++			"SLOT %s: Failed to read attributes - the device is probably not A/B partitioned\n",
++			slot_suffix_arr[slot]);
++		ret = -ENODEV;
+ 		goto out;
+ 	}
+ 
+diff --git a/qbootctl.c b/qbootctl.c
+index 463ff25..4999084 100644
+--- a/qbootctl.c
++++ b/qbootctl.c
+@@ -194,10 +194,12 @@ int main(int argc, char **argv)
+ 		return 0;
+ 	case 'm':
+ 		rc = impl->markBootSuccessful(slot);
+-		if (rc < 0)
++		if (rc == -ENODEV)
++			printf("Did not mark any boot as successful, not necessary\n");
++		else if (rc < 0)
+ 			return 1;
+-		printf("SLOT %s: Marked boot successful\n",
+-		       impl->getSuffix(slot));
++		else
++			printf("SLOT %s: Marked boot successful\n", impl->getSuffix(slot));
+ 		return 0;
+ 	case 'u':
+ 		rc = impl->setSlotAsUnbootable(slot);
+-- 
+2.49.0
+
