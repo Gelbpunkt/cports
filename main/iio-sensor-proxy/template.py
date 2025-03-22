@@ -1,17 +1,19 @@
 pkgname = "iio-sensor-proxy"
 pkgver = "3.7"
-pkgrel = 0
+pkgrel = 1
 build_style = "meson"
 configure_args = [
     "--libexecdir=/usr/lib",  # XXX drop libexec
     "-Dsystemdsystemunitdir=",
     "-Dgeoclue-user=_geoclue",
+    "-Dssc-support=true",
 ]
 hostmakedepends = ["glib-devel", "meson", "pkgconf"]
 makedepends = [
     "dinit-chimera",
     "glib-devel",
     "libgudev-devel",
+    "libssc-devel",
     "linux-headers",
     "polkit-devel",
     "udev-devel",
