@@ -1,0 +1,3 @@
+SUBSYSTEM=="misc", KERNEL=="fastrpc-adsp", OWNER="_fastrpc", GROUP="_fastrpc", MODE="600", TAG+="dinit", ENV{DINIT_WAITS_FOR}+="hexagonrpcd"
+
+SUBSYSTEM=="misc", KERNEL=="fastrpc-sdsp", OWNER="_fastrpc", GROUP="_fastrpc", MODE="600", TAG+="dinit", ENV{DINIT_WAITS_FOR}+="hexagonrpcd"
