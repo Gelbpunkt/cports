@@ -1,0 +1,7 @@
+#!/bin/sh -e
+
+[ "$1" = "prereqs" ] && exit 0
+
+. /usr/share/initramfs-tools/hook-functions
+
+install -Dm644 /usr/lib/firmware/qcom/a630_* "$DESTDIR/usr/lib/firmware/qcom/"
