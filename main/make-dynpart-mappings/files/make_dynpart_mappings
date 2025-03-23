@@ -1,0 +1,7 @@
+#!/bin/sh -e
+
+[ "$1" = "prereqs" ] && exit 0
+
+. /usr/share/initramfs-tools/hook-functions
+
+cp /usr/bin/make-dynpart-mappings "$DESTDIR/usr/bin/"
