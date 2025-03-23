@@ -1,0 +1,76 @@
+From 7a94403fc975a47a0c3f76fc97e5c634de4a560b Mon Sep 17 00:00:00 2001
+From: Jens Reidel <adrian@travitia.xyz>
+Date: Mon, 24 Mar 2025 03:44:08 +0100
+Subject: [PATCH] Use bluetoothctl
+
+Signed-off-by: Jens Reidel <adrian@travitia.xyz>
+---
+ bootmac | 27 +--------------------------
+ 1 file changed, 1 insertion(+), 26 deletions(-)
+
+diff --git a/bootmac b/bootmac
+index d865336..51f84a3 100755
+--- a/bootmac
++++ b/bootmac
+@@ -13,7 +13,6 @@ set -e
+ WLAN_MAC=""
+ BT_MAC=""
+ WLAN_INTERFACE="wlan0"
+-BT_INTERFACE="hci0"
+ # Default MAC prefix
+ MAC_PREFIX="0200"
+ BT_TIMEOUT=${BT_TIMEOUT:-5} # seconds
+@@ -33,7 +32,6 @@ log() {
+ help_info() {
+     echo "bootmac options:"
+     echo "    -b | --bluetooth              = Configure Bluetooth interface's MAC"
+-    echo "    -B | --bluetooth-if <if-name> = Specify the Bluetooth interface name, like hci0. Implies -b"
+     echo "    -w | --wlan                   = Configure WLAN interface's MAC"
+     echo "    -W | --wlan-if <if-name>      = Specify the WLAN interface name, like wlP6p1s0. Implies -w"
+     echo "    -g | --generate-only          = Generate and print the MAC address to stdout, but do not configure the interface."
+@@ -152,28 +150,11 @@ mac_generate() {
+ mac_bluetooth() {
+     log "setting Bluetooth MAC to $BT_MAC"
+ 
+-    # Check if the Bluetooth interface is up
+-    if hciconfig "$BT_INTERFACE" | grep -q "UP"; then
+-        # Bring the Bluetooth interface down
+-        hciconfig "$BT_INTERFACE" down
+-    fi
+-
+-    # Save current rfkill status, may return a non-zero exit code when blocked
+-    set +e
+-    BT_RFKILL_UNBLOCKED=$(rfkill -n -r -o DEVICE,TYPE,SOFT | grep "bluetooth" | grep "unblocked")
+-    log "saved Bluetooth rfkill state"
+-    set -e
+-
+-    # Bring Bluetooth down, set the generated MAC and bring it up again
+-    # The 'yes | btmgmt xxx' workaround is needed for proper working of btmgmt
+-    # as noted in https://gitlab.com/postmarketOS/bootmac/-/issues/3
+-    yes | btmgmt -i "$BT_INTERFACE" power off
+-
+     # Setting the mac addr might fail if the device/driver hasn't finished
+     # initializing, so retry
+     timeout=0
+     while [ $timeout -lt "$BT_TIMEOUT" ]; do
+-        if yes | btmgmt -i "$BT_INTERFACE" public-addr "$BT_MAC"; then
++        if bluetoothctl mgmt.public-addr "$BT_MAC"; then
+             break
+         fi
+         log "Unable to set Bluetooth MAC, retrying after 1 second..."
+@@ -185,12 +166,6 @@ mac_bluetooth() {
+         log "Failed to set Bluetooth MAC address, command timed out after $BT_TIMEOUT seconds"
+         return 1
+     fi
+-
+-    if [ -n "$BT_RFKILL_UNBLOCKED" ]; then
+-        log "restoring Bluetooth rfkill state to unblocked"
+-        rfkill unblock bluetooth
+-        yes | btmgmt -i "$BT_INTERFACE" power on
+-    fi
+ }
+ 
+ mac_wlan() {
+-- 
+2.49.0
+
