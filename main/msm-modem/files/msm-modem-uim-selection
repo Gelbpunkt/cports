@@ -1,0 +1,5 @@
+type = process
+command = /usr/bin/msm-modem-uim-selection
+run-as = _msm-modem
+depends-on: local.target
+depends-on: rmtfs
