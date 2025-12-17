@@ -15,6 +15,7 @@ _targetlist = [
     ("aarch64", "arm64"),
     ("armhf", "arm"),
     ("armv7", "arm"),
+    ("hexagon", "hexagon"),
     ("ppc64le", "powerpc"),
     ("ppc64", "powerpc"),
     ("ppc", "powerpc"),

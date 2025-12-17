@@ -16,6 +16,7 @@ _targetlist = [
     "aarch64",
     "armhf",
     "armv7",
+    "hexagon",
     "ppc64le",
     "ppc64",
     "ppc",
